@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 업무 타임라인</title>
+</head>
+<body>
+  <script>
+    fetch(encodeURI("./실습1"))
+      .then((response) => {
+        if (!response.ok) throw new Error("게시판 파일을 불러올 수 없습니다.");
+        return response.text();
+      })
+      .then((page) => {
+        document.open();
+        document.write(page);
+        document.close();
+      })
+      .catch(() => {
+        document.body.textContent = "게시판을 불러오지 못했습니다.";
+      });
+  </script>
+</body>
+</html>
