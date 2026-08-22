@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 업무 타임라인</title>
+  <style>
+    :root {
+      color: #1f2937;
+      background: #f3f4f6;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      padding: 48px 20px;
+      background: linear-gradient(135deg, #f5f0ff, #faf8ff 55%, #f1edff);
+    }
+
+    main {
+      width: min(100%, 760px);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: #64748b;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .card {
+      padding: 26px;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 12px 30px rgb(15 23 42 / 8%);
+    }
+
+    .form-card { margin-bottom: 24px; }
+
+    .year-picker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 14px 16px;
+      border: 1px solid #ddd6fe;
+      border-radius: 12px;
+      background: #faf5ff;
+    }
+
+    .year-picker label { margin: 0; white-space: nowrap; }
+    .year-picker input { width: 100px; margin: 0; }
+
+    .date-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .date-fields select { margin-bottom: 0; }
+
+    label {
+      display: block;
+      margin: 0 0 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      color: inherit;
+      font: inherit;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    textarea { min-height: 130px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgb(139 92 246 / 18%);
+    }
+
+    .form-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    #message { min-height: 1.25em; margin: 0; color: #dc2626; font-size: .9rem; }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 17px;
+      background: #8b5cf6;
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s, transform .15s;
+    }
+
+    button:hover { background: #7c3aed; }
+    button:active { transform: translateY(1px); }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin: 0 0 12px;
+    }
+
+    h2 { margin: 0; font-size: 1.2rem; }
+    #post-count { color: #64748b; font-size: .9rem; }
+    #post-list { display: grid; gap: 14px; }
+
+    .post { position: relative; padding: 22px; }
+    .post h3 { margin: 0 90px 10px 0; font-size: 1.13rem; overflow-wrap: anywhere; }
+    .post-content { margin: 0; color: #475569; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .post time { display: block; margin-top: 18px; color: #94a3b8; font-size: .84rem; }
+    .delete-button { position: absolute; top: 18px; right: 18px; padding: 7px 10px; background: #f3e8ff; color: #7e22ce; font-size: .84rem; }
+    .delete-button:hover { background: #e9d5ff; }
+
+    .empty { padding: 34px 20px; text-align: center; color: #64748b; }
+
+    .calendar-card { margin-bottom: 24px; padding: 20px; }
+    .calendar-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .calendar-toolbar h2 { text-align: center; }
+    .month-button { padding: 8px 12px; background: #ede9fe; color: #6d28d9; }
+    .month-button:hover { background: #ddd6fe; }
+    .month-button:disabled { opacity: .45; cursor: not-allowed; }
+    .calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .calendar-weekdays { margin-bottom: 6px; color: #7c3aed; font-size: .78rem; font-weight: 700; text-align: center; }
+    .calendar-grid { border-top: 1px solid #e9d5ff; border-left: 1px solid #e9d5ff; }
+    .calendar-day { min-height: 126px; padding: 7px; border-right: 1px solid #e9d5ff; border-bottom: 1px solid #e9d5ff; background: #fff; color: inherit; cursor: pointer; }
+    .calendar-day:hover { background: #faf5ff; }
+    .calendar-day.is-empty { background: #fcfbff; cursor: default; }
+    .calendar-day.is-selected { outline: 3px solid #a78bfa; outline-offset: -3px; background: #f5f3ff; }
+    .day-number { display: block; margin-bottom: 6px; color: #5b21b6; font-size: .84rem; font-weight: 700; }
+    .calendar-post { position: relative; margin: 0 0 5px; padding: 5px 18px 5px 6px; border-radius: 6px; background: #f3e8ff; color: #581c87; font-size: .72rem; line-height: 1.35; overflow-wrap: anywhere; }
+    .calendar-post time { display: block; margin-bottom: 2px; color: #7e22ce; font-size: .67rem; font-weight: 700; }
+    .calendar-post { cursor: pointer; }
+    .calendar-post .post-content { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+    .calendar-post:hover .post-content, .calendar-post.is-expanded .post-content { display: block; }
+    .calendar-post .delete-button { position: absolute; top: 3px; right: 3px; padding: 1px 4px; border-radius: 4px; background: transparent; color: #7e22ce; font-size: .68rem; }
+    .calendar-post .edit-button { position: absolute; right: 3px; bottom: 3px; padding: 1px 4px; border-radius: 4px; background: transparent; color: #7e22ce; font-size: .68rem; }
+    .cancel-button[hidden] { display: none; }
+    .cancel-button { background: #ede9fe; color: #6d28d9; }
+    .cancel-button:hover { background: #ddd6fe; }
+    .selected-date { margin: 0 0 18px; padding: 11px 14px; border-radius: 10px; background: #f5f3ff; color: #5b21b6; font-weight: 700; }
+    .time-field { max-width: 210px; }
+    .category-panel { margin-bottom: 24px; }
+    .category-panel h2 { margin-bottom: 14px; }
+    .category-form { display: flex; gap: 10px; align-items: center; }
+    .category-form input[type="text"] { margin: 0; }
+    .category-form input[type="color"] { width: 48px; height: 44px; margin: 0; padding: 4px; cursor: pointer; }
+    .category-form button { white-space: nowrap; }
+    .category-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .category-folder { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid #ddd6fe; border-radius: 9px; background: #faf5ff; color: #4c1d95; cursor: pointer; }
+    .category-folder.is-active { border-color: #7c3aed; box-shadow: 0 0 0 2px rgb(124 58 237 / 15%); }
+    .category-folder .folder-color { width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+    .category-folder .folder-count { color: #7c3aed; font-size: .78rem; }
+    #category { margin-bottom: 18px; }
+
+    @media (max-width: 480px) {
+      body { padding: 28px 14px; }
+      .card { padding: 20px; }
+      .year-picker { align-items: flex-start; flex-direction: column; }
+      .year-picker input { width: 100%; }
+      .calendar-card { padding: 12px; overflow-x: auto; }
+      .calendar-weekdays, .calendar-grid { min-width: 590px; }
+      .calendar-day { min-height: 110px; }
+      .category-form { align-items: stretch; flex-wrap: wrap; }
+      .category-form input[type="text"] { flex: 1 1 180px; }
+      .form-footer { align-items: flex-end; flex-direction: column; }
+      .form-footer button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>2026 업무 타임라인</h1>
+    <p class="subtitle">날짜를 선택하고 업무 일정과 시간을 기록해 보세요.</p>
+
+    <section class="card category-panel" aria-labelledby="category-heading">
+      <h2 id="category-heading">업무 구분</h2>
+      <form id="category-form" class="category-form">
+        <input id="category-name" type="text" placeholder="새 대주제 이름" aria-label="새 대주제 이름">
+        <input id="category-color" type="color" value="#8b5cf6" aria-label="대주제 색상">
+        <button type="submit">추가</button>
+      </form>
+      <div id="category-list" class="category-list" aria-label="업무 구분 폴더 목록"></div>
+    </section>
+
+    <section class="card calendar-card" aria-labelledby="calendar-heading">
+      <div class="calendar-toolbar">
+        <button id="previous-month" class="month-button" type="button" aria-label="이전 달">‹</button>
+        <h2 id="calendar-heading"><span id="calendar-month"></span></h2>
+        <button id="next-month" class="month-button" type="button" aria-label="다음 달">›</button>
+      </div>
+      <div class="calendar-weekdays" aria-hidden="true">
+        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+      </div>
+      <div id="calendar-grid" class="calendar-grid" aria-label="날짜 선택 달력"></div>
+    </section>
+
+    <section class="card form-card" aria-labelledby="write-heading">
+      <h2 id="write-heading">업무 작성</h2>
+      <form id="post-form" novalidate>
+        <p id="selected-date" class="selected-date">달력에서 날짜를 선택해 주세요.</p>
+
+        <label for="category">업무 구분</label>
+        <select id="category" name="category"></select>
+
+        <label for="schedule-time">시간</label>
+        <input id="schedule-time" class="time-field" name="schedule-time" type="time">
+
+        <label for="content">내용</label>
+        <textarea id="content" name="content" placeholder="내용을 입력하세요"></textarea>
+
+        <div class="form-footer">
+          <p id="message" role="alert" aria-live="polite"></p>
+          <div>
+            <button id="cancel-edit" class="cancel-button" type="button" hidden>수정 취소</button>
+            <button id="submit-post" type="submit">등록</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <p id="post-count" class="visually-hidden">0개</p>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "simple-local-board-posts";
+    const CATEGORY_STORAGE_KEY = "simple-local-board-categories";
+    const YEAR = 2026;
+    const form = document.querySelector("#post-form");
+    const submitPostButton = document.querySelector("#submit-post");
+    const cancelEditButton = document.querySelector("#cancel-edit");
+    const categoryForm = document.querySelector("#category-form");
+    const categoryNameInput = document.querySelector("#category-name");
+    const categoryColorInput = document.querySelector("#category-color");
+    const categoryInput = document.querySelector("#category");
+    const categoryList = document.querySelector("#category-list");
+    const contentInput = document.querySelector("#content");
+    const timeInput = document.querySelector("#schedule-time");
+    const message = document.querySelector("#message");
+    const selectedDateLabel = document.querySelector("#selected-date");
+    const calendarGrid = document.querySelector("#calendar-grid");
+    const calendarMonth = document.querySelector("#calendar-month");
+    const previousMonthButton = document.querySelector("#previous-month");
+    const nextMonthButton = document.querySelector("#next-month");
+    const postCount = document.querySelector("#post-count");
+
+    const today = new Date();
+    let displayedMonth = today.getFullYear() === YEAR ? today.getMonth() : 0;
+    let selectedDate = "";
+    let activeCategoryId = "all";
+    let editingPostId = null;
+
+    function getPosts() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(saved) ? saved : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function savePosts(posts) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+    }
+
+    function getCategories() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CATEGORY_STORAGE_KEY) || "[]");
+        const categories = Array.isArray(saved) ? saved : [];
+        return categories.some((category) => category.id === "uncategorized")
+          ? categories
+          : [{ id: "uncategorized", name: "미분류", color: "#8b5cf6" }, ...categories];
+      } catch {
+        return [{ id: "uncategorized", name: "미분류", color: "#8b5cf6" }];
+      }
+    }
+
+    function saveCategories(categories) {
+      localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify(categories));
+    }
+
+    function getCategory(post) {
+      return getCategories().find((category) => category.id === post.categoryId)
+        || getCategories().find((category) => category.id === "uncategorized");
+    }
+
+    function renderCategories() {
+      const categories = getCategories();
+      const posts = getPosts();
+      categoryList.replaceChildren();
+      categoryInput.replaceChildren();
+
+      const allFolder = document.createElement("button");
+      allFolder.type = "button";
+      allFolder.className = `category-folder${activeCategoryId === "all" ? " is-active" : ""}`;
+      allFolder.textContent = `전체 (${posts.length})`;
+      allFolder.addEventListener("click", () => { activeCategoryId = "all"; renderCategories(); renderCalendar(); });
+      categoryList.append(allFolder);
+
+      categories.forEach((category) => {
+        const option = new Option(category.name, category.id);
+        categoryInput.add(option);
+
+        const folder = document.createElement("button");
+        folder.type = "button";
+        folder.className = `category-folder${activeCategoryId === category.id ? " is-active" : ""}`;
+        folder.style.borderColor = category.color;
+        folder.addEventListener("click", () => { activeCategoryId = category.id; renderCategories(); renderCalendar(); });
+
+        const color = document.createElement("input");
+        color.type = "color";
+        color.className = "folder-color";
+        color.value = category.color;
+        color.setAttribute("aria-label", `${category.name} 색상 변경`);
+        color.addEventListener("click", (event) => event.stopPropagation());
+        color.addEventListener("input", (event) => {
+          event.stopPropagation();
+          saveCategories(getCategories().map((item) => item.id === category.id ? { ...item, color: event.target.value } : item));
+          renderCategories();
+          renderCalendar();
+        });
+
+        const name = document.createElement("span");
+        name.textContent = category.name;
+        const count = document.createElement("span");
+        count.className = "folder-count";
+        count.textContent = posts.filter((post) => (post.categoryId || "uncategorized") === category.id).length;
+        folder.append(color, name, count);
+        categoryList.append(folder);
+      });
+    }
+
+    function formatSelectedDate(date) {
+      const [year, month, day] = date.split("-").map(Number);
+      return `${year}년 ${month}월 ${day}일`;
+    }
+
+    function selectDate(date) {
+      selectedDate = date;
+      selectedDateLabel.textContent = `선택한 일자: ${formatSelectedDate(date)}`;
+      message.textContent = "";
+      renderCalendar();
+      timeInput.focus();
+    }
+
+    function resetEditor() {
+      editingPostId = null;
+      form.reset();
+      submitPostButton.textContent = "등록";
+      cancelEditButton.hidden = true;
+      message.textContent = "";
+    }
+
+    function startEdit(post) {
+      editingPostId = post.id;
+      selectedDate = post.date;
+      selectedDateLabel.textContent = `수정 중인 일자: ${formatSelectedDate(post.date)}`;
+      categoryInput.value = post.categoryId || "uncategorized";
+      timeInput.value = post.time || "";
+      contentInput.value = post.content;
+      submitPostButton.textContent = "수정 저장";
+      cancelEditButton.hidden = false;
+      message.textContent = "";
+      contentInput.focus();
+    }
+
+    function createCalendarPost(post) {
+      const item = document.createElement("div");
+      item.className = "calendar-post";
+      const category = getCategory(post);
+      item.style.backgroundColor = `${category.color}22`;
+      item.style.color = category.color;
+
+      const time = document.createElement("time");
+      time.textContent = `${category.name} · ${post.time || "시간 미정"}`;
+      time.style.color = category.color;
+
+      const content = document.createElement("span");
+      content.className = "post-content";
+      content.textContent = post.content;
+
+      item.addEventListener("click", (event) => {
+        event.stopPropagation();
+        item.classList.toggle("is-expanded");
+      });
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "delete-button";
+      deleteButton.textContent = "×";
+      deleteButton.setAttribute("aria-label", "게시글 삭제");
+      deleteButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        deletePost(post.id);
+      });
+
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.className = "edit-button";
+      editButton.textContent = "✎";
+      editButton.setAttribute("aria-label", "게시글 수정");
+      editButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        startEdit(post);
+      });
+
+      item.append(time, content, editButton, deleteButton);
+      return item;
+    }
+
+    function renderCalendar() {
+      const allPosts = getPosts();
+      const posts = activeCategoryId === "all"
+        ? allPosts
+        : allPosts.filter((post) => (post.categoryId || "uncategorized") === activeCategoryId);
+      const datePrefix = `${YEAR}-${String(displayedMonth + 1).padStart(2, "0")}-`;
+      const postsByDate = new Map();
+      posts.filter((post) => (post.date || "").startsWith(datePrefix)).forEach((post) => {
+        const dayPosts = postsByDate.get(post.date) || [];
+        dayPosts.push(post);
+        postsByDate.set(post.date, dayPosts);
+      });
+      postsByDate.forEach((dayPosts) => dayPosts.sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99")));
+
+      calendarGrid.replaceChildren();
+      calendarMonth.textContent = `${displayedMonth + 1}월`;
+      previousMonthButton.disabled = displayedMonth === 0;
+      nextMonthButton.disabled = displayedMonth === 11;
+      postCount.textContent = `${posts.length}개`;
+
+      const firstWeekday = new Date(YEAR, displayedMonth, 1).getDay();
+      const daysInMonth = new Date(YEAR, displayedMonth + 1, 0).getDate();
+      for (let index = 0; index < firstWeekday; index += 1) {
+        const empty = document.createElement("div");
+        empty.className = "calendar-day is-empty";
+        empty.setAttribute("aria-hidden", "true");
+        calendarGrid.append(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const date = `${YEAR}-${String(displayedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const cell = document.createElement("div");
+        cell.className = "calendar-day";
+        cell.tabIndex = 0;
+        cell.setAttribute("role", "button");
+        cell.setAttribute("aria-label", `${formatSelectedDate(date)} 선택`);
+        if (date === selectedDate) cell.classList.add("is-selected");
+        cell.addEventListener("click", () => selectDate(date));
+        cell.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectDate(date);
+          }
+        });
+
+        const number = document.createElement("span");
+        number.className = "day-number";
+        number.textContent = day;
+        cell.append(number);
+        (postsByDate.get(date) || []).forEach((post) => cell.append(createCalendarPost(post)));
+        calendarGrid.append(cell);
+      }
+    }
+
+    function deletePost(id) {
+      savePosts(getPosts().filter((post) => post.id !== id));
+      renderCategories();
+      renderCalendar();
+    }
+
+    categoryForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const name = categoryNameInput.value.trim();
+      if (!name) {
+        categoryNameInput.focus();
+        return;
+      }
+      const categories = getCategories();
+      if (categories.some((category) => category.name === name)) {
+        categoryNameInput.select();
+        return;
+      }
+      const id = crypto.randomUUID ? crypto.randomUUID() : `category-${Date.now()}-${Math.random()}`;
+      saveCategories([...categories, { id, name, color: categoryColorInput.value }]);
+      categoryForm.reset();
+      categoryColorInput.value = "#8b5cf6";
+      renderCategories();
+      categoryInput.value = id;
+      categoryNameInput.focus();
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const content = contentInput.value.trim();
+      if (!selectedDate || !content) {
+        message.textContent = "달력에서 일자를 선택하고 내용을 입력해 주세요.";
+        if (!selectedDate) calendarGrid.querySelector(".calendar-day")?.focus(); else contentInput.focus();
+        return;
+      }
+
+      const posts = getPosts();
+      if (editingPostId) {
+        const postIndex = posts.findIndex((post) => post.id === editingPostId);
+        if (postIndex >= 0) {
+          posts[postIndex] = {
+            ...posts[postIndex],
+            categoryId: categoryInput.value || "uncategorized",
+            time: timeInput.value,
+            content
+          };
+        }
+      } else {
+        posts.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+          date: selectedDate,
+          time: timeInput.value,
+          categoryId: categoryInput.value || "uncategorized",
+          content,
+          createdAt: new Date().toISOString()
+        });
+      }
+      savePosts(posts);
+      resetEditor();
+      renderCategories();
+      renderCalendar();
+      contentInput.focus();
+    });
+
+    cancelEditButton.addEventListener("click", resetEditor);
+
+    previousMonthButton.addEventListener("click", () => {
+      if (displayedMonth > 0) { displayedMonth -= 1; renderCalendar(); }
+    });
+    nextMonthButton.addEventListener("click", () => {
+      if (displayedMonth < 11) { displayedMonth += 1; renderCalendar(); }
+    });
+    renderCategories();
+    renderCalendar();
+  </script>
+</body>
+</html>
