@@ -4,6 +4,7 @@
 !.env.example
 .vscode/
 .idea/
+.wrangler/
 
 # Dependency and build output
 node_modules/
