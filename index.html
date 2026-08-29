@@ -7,7 +7,7 @@
 </head>
 <body>
   <script>
-    fetch(encodeURI("./실습1"))
+    fetch(encodeURI("./실습1.html"))
       .then((response) => {
         if (!response.ok) throw new Error("게시판 파일을 불러올 수 없습니다.");
         return response.text();
