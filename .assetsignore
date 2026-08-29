@@ -4,3 +4,5 @@
 .assetsignore
 README.md
 wrangler.jsonc
+.wrangler
+.wrangler/**
