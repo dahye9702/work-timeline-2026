@@ -1,18 +1,8 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "dahye-work-timeline-2026",
-  "main": "./src/worker.js",
-  "compatibility_date": "2026-08-29",
-  "triggers": {
-    "crons": ["0 23 * * *"]
-  },
-  "kv_namespaces": [
-    {
-      "binding": "NEWS_CACHE"
-    }
-  ],
+  "compatibility_date": "2026-08-22",
   "assets": {
-    "directory": ".",
-    "binding": "ASSETS"
+    "directory": "."
   }
 }

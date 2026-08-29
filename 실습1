@@ -189,16 +189,6 @@
     .category-folder .folder-color { width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
     .category-folder .folder-count { color: #7c3aed; font-size: .78rem; }
     #category { margin-bottom: 18px; }
-    .news-card { margin-bottom: 24px; }
-    .news-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-    .news-heading p { margin: 0; color: #64748b; font-size: .82rem; }
-    .news-status { margin: 0; color: #64748b; line-height: 1.6; }
-    .news-list { display: grid; gap: 10px; margin: 14px 0 0; padding: 0; list-style: none; }
-    .news-item { padding: 13px 14px; border: 1px solid #ede9fe; border-radius: 11px; background: #fcfbff; }
-    .news-item a { color: #4c1d95; font-weight: 800; line-height: 1.45; text-decoration: none; }
-    .news-item a:hover { text-decoration: underline; }
-    .news-summary { margin: 7px 0 0; color: #475569; font-size: .9rem; line-height: 1.6; }
-    .news-meta { margin: 7px 0 0; color: #7c3aed; font-size: .78rem; }
 
     @media (max-width: 480px) {
       body { padding: 28px 14px; }
@@ -219,15 +209,6 @@
   <main>
     <h1>2026 업무 타임라인</h1>
     <p class="subtitle">날짜를 선택하고 업무 일정과 시간을 기록해 보세요.</p>
-
-    <section class="card news-card" aria-labelledby="news-heading">
-      <div class="news-heading">
-        <h2 id="news-heading">오늘의 국내 에너지 뉴스</h2>
-        <p id="news-updated" aria-live="polite"></p>
-      </div>
-      <p id="news-status" class="news-status">오늘의 뉴스 클리핑을 불러오는 중입니다.</p>
-      <ul id="news-list" class="news-list" hidden></ul>
-    </section>
 
     <section class="card category-panel" aria-labelledby="category-heading">
       <h2 id="category-heading">업무 구분</h2>
@@ -290,7 +271,6 @@
     const categoryColorInput = document.querySelector("#category-color");
     const categoryInput = document.querySelector("#category");
     const categoryList = document.querySelector("#category-list");
-
     const contentInput = document.querySelector("#content");
     const timeInput = document.querySelector("#schedule-time");
     const message = document.querySelector("#message");
@@ -300,9 +280,6 @@
     const previousMonthButton = document.querySelector("#previous-month");
     const nextMonthButton = document.querySelector("#next-month");
     const postCount = document.querySelector("#post-count");
-    const newsStatus = document.querySelector("#news-status");
-    const newsList = document.querySelector("#news-list");
-    const newsUpdated = document.querySelector("#news-updated");
 
     const today = new Date();
     let displayedMonth = today.getFullYear() === YEAR ? today.getMonth() : 0;
@@ -337,47 +314,6 @@
 
     function saveCategories(categories) {
       localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify(categories));
-    }
-
-    function formatNewsUpdated(value) {
-      if (!value) return "";
-      return `업데이트 ${new Intl.DateTimeFormat("ko-KR", { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(value))}`;
-    }
-
-    async function renderNews() {
-      try {
-        const response = await fetch("/api/news");
-        if (!response.ok) throw new Error("뉴스를 불러오지 못했습니다.");
-        const data = await response.json();
-        newsList.replaceChildren();
-        newsUpdated.textContent = formatNewsUpdated(data.updatedAt);
-        if (!data.items?.length) {
-          newsStatus.textContent = "첫 뉴스 클리핑을 준비하고 있습니다. 설정이 완료되면 매일 자동으로 표시됩니다.";
-          newsList.hidden = true;
-          return;
-        }
-        data.items.forEach((item) => {
-          const li = document.createElement("li");
-          li.className = "news-item";
-          const link = document.createElement("a");
-          link.href = item.url;
-          link.target = "_blank";
-          link.rel = "noreferrer";
-          link.textContent = item.title;
-          const summary = document.createElement("p");
-          summary.className = "news-summary";
-          summary.textContent = item.summary;
-          const meta = document.createElement("p");
-          meta.className = "news-meta";
-          meta.textContent = [item.category, item.source].filter(Boolean).join(" · ");
-          li.append(link, summary, meta);
-          newsList.append(li);
-        });
-        newsStatus.hidden = true;
-        newsList.hidden = false;
-      } catch {
-        newsStatus.textContent = "뉴스 클리핑 연결을 준비하고 있습니다.";
-      }
     }
 
     function getCategory(post) {
@@ -637,7 +573,6 @@
     });
     renderCategories();
     renderCalendar();
-    renderNews();
   </script>
 </body>
 </html>

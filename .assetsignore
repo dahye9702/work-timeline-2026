@@ -4,5 +4,3 @@
 .assetsignore
 README.md
 wrangler.jsonc
-src
-src/**
